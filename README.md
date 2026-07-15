@@ -76,6 +76,17 @@ Una vez obtenido el conteo de imágenes por subconjunto, se filtra el set de tra
 
 El gráfico muestra un desequilibrio leve en el conjunto train, donde la cantidad de fotos por especie varía en un rango de entre aproximadamente 130 y 190 imágenes. La clase con mayor representación en el catálogo es *AFRICAN PIED HORNBILL*, superando las 175 fotografías, mientras que la especie *ALBATROSS* es la que cuenta con el menor volumen de datos, ubicándose cerca de las 130 muestras aprox. Aunque la diferencia en cantidad no es mucha, se confirma que los datos no están balanceados, lo que justifica la aplicación de pesos de clase durante el entrenamiento para asegurar que el modelo no se sesgue hacia las aves más frecuentes y evalúe a todas las categorías con la misma importancia.
 
+Posterior a eso, se usó la función *describe()* para revisar de forma rápida el tamaño de una muestra de imágenes del dataset y así saber si era necesario cambiarles el tamaño antes de entrenar el modelo. 
+
+![Describe del dataset](imagenes_informe/describe.png)
+
+Al revisar los resultados, se observa que todas las imágenes de la muestra miden exactamente 224 de ancho por 224 de alto, sin ninguna variación entre ellas hciendo que la desviación estándar sea 0. Esto significa que las imágenes ya vienen con un tamaño uniforme, por lo que no fue necesario aplicar un redimensionamiento adicional antes de usarlas en el entrenamiento. 
+
+Sin embargo, el análisis previo mostró que algunas especies de aves tienen bastantes más imágenes que otras. Esto es un problema, porque si el modelo ve muchas más fotos de una especie que de otra, puede terminar aprendiendo a acertar solo en las especies con más ejemplos, y fallar en las que tienen pocas. Para evitar eso, se calculó un peso distinto para cada especie: a las especies con pocas imágenes se les da un peso más alto, y a las que tienen muchas imágenes se les da un peso más bajo. De esta forma, cuando el modelo se equivoca en una especie con pocas fotos, ese error pesa más durante el entrenamiento, obligando al modelo a hacerlo mejor.
+
+![nuevos pesos](imagenes_informe/sesgo.png)
+
+
 ### Entrenamiento (Optimización). 
 ### Control de overfitting (Regularización).  
 ### Testeo. 
