@@ -52,6 +52,36 @@ Para clasificar las 20 especies de aves se utilizará la arquitectura ResNet50 m
 
 * **Pertinencia**: esta estrategia es indicada para resolver el problema de clasificar 20 especies de aves con un conjunto limitado de imágenes. Puesto que es más eficiente aprovechar la inteligencia visual que el modelo ya construyó previamente, en lugar de gastar tiempo buscando miles de fotos nuevas para entrenar una red neuronal completamente desde cero.
 
+## Implementación
+
+### EDA y feature engineering 
+
+Primeramente, se definen las rutas de las carpetas principales del proyecto, identificando la ubicación de las imágenes para el entrenamiento, la validación y las pruebas finales del modelo. A continuación, el sistema obtiene la lista de las especies disponibles en la carpeta de entrenamiento para seleccionar las primeras diez incluyendo el nombre de cada ave como título. 
+
+![Especies disponibles (10)](imagenes_informe/aves_train.png)
+
+Luego, se define una funcion para contar el número de imágenes que existen por especie en cada conjunto de datos: 
+
+
+| Conjunto de Datos | Cantidad |
+| :--- | :--- |
+| Total imágenes train (Entrenamiento) | 3208 |
+| Total imágenes valid (Validación) | 100 |
+| Total imágenes test (Prueba) | 100 |
+| **Número total de especies** | **20** |
+
+Una vez obtenido el conteo de imágenes por subconjunto, se filtra el set de train para extraer el ave con la mayor cantidad de imagenes:
+
+![Cantidad de imágenes por especie](imagenes_informe/count_imagxespecie.png)
+
+El gráfico muestra un desequilibrio leve en el conjunto train, donde la cantidad de fotos por especie varía en un rango de entre aproximadamente 130 y 190 imágenes. La clase con mayor representación en el catálogo es *AFRICAN PIED HORNBILL*, superando las 175 fotografías, mientras que la especie *ALBATROSS* es la que cuenta con el menor volumen de datos, ubicándose cerca de las 130 muestras aprox. Aunque la diferencia en cantidad no es mucha, se confirma que los datos no están balanceados, lo que justifica la aplicación de pesos de clase durante el entrenamiento para asegurar que el modelo no se sesgue hacia las aves más frecuentes y evalúe a todas las categorías con la misma importancia.
+
+### Entrenamiento (Optimización). 
+### Control de overfitting (Regularización).  
+### Testeo. 
+### Visualización de resultados. 
+### Métricas
+
 ## Referencias
 
 * Ornithology | Zoology | Research Starters | EBSCO Research. (s. f.). EBSCO. https://www.ebsco.com/research-starters/zoology/ornithology 
