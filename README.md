@@ -4,8 +4,8 @@
  >env create -f environment.yml
  >### 2. Activar el Environment
 >conda activate birds
-* Fabián Ayala Castillo
-* Carla Herrera Vidal
+- Fabián Ayala Castillo
+- Carla Herrera Vidal
 
 ## Clasificación de especies de aves mediante Deep Learning
 
@@ -21,7 +21,7 @@ El problema consiste en que dada una imagen de un ave se pueda predecir a cual d
 
 ### Descripción del dataset y fuente
 
-Se utilizará el dataset *"Birds 20 Species - Image Classification"* descargado de Kaggle: [https://www.kaggle.com/datasets/umairshahpirzada/birds-20-species-image-classification/data](https://www.kaggle.com/datasets/umairshahpirzada/birds-20-species-image-classification/data)
+Se utilizará el dataset *"Birds 20 Species - Image Classification"* descargado de Kaggle: [https://www.kaggle.com/datasets/umairshahpirzada/birds-20-species-image-classification/data](https://www.kaggle.com/datasets/umairshahpirzada/birds-20-species-image-classification/data) (Se prefirió no subirlo al github por el peso de las imagenes de 72.67MB)
 
 El dataset contiene imágenes a color en formato jpg, organizadas en tres subconjuntos ya definidos:
 
@@ -86,7 +86,7 @@ Sin embargo, el análisis previo mostró que algunas especies de aves tienen bas
 
 ### Feature Engineering 
 
-Para el comienzo de la transformación de la data, se importó la arquitectura ResNet50 y se establece una secuencia de preprocesamiento; primero se cambia el tamaño de la imagen a 256 pixelesy luego se recorta para dejarla en 224x224 que es el tamaño que el modelo espera. Los datos se convierten en un tensor para que esté en el formato numérico correcto y se normalizan con la media y desviación estándar de ImageNet, asegurando que las imagenes lleguen al modelo en las mismas condiciones que este aprendió.
+Para el comienzo de la transformación de la data, se importó la arquitectura ResNet50 y se establece una secuencia de preprocesamiento; primero se cambia el tamaño de la imagen a 256 pixeles y luego se recorta para dejarla en 224x224 que es el tamaño que el modelo espera. Los datos se convierten en un tensor para que esté en el formato numérico correcto y se normalizan con la media y desviación estándar de ImageNet, asegurando que las imagenes lleguen al modelo en las mismas condiciones que este aprendió.
 
 ### Entrenamiento (Optimización). 
 
@@ -106,15 +106,20 @@ El gráfico de abajo muestra la evolución de la función de pérdida durante el
 
 Y se observa que la curva de validación se mantiene por debajo de la curva de entrenamiento durante todo el proceso, lo que sugiere que el modelo generaliza adecuadamente sobre datos no utilizados para el ajuste de los parámetros por tanto no hay overfitting.
 
-Una vez finalizado el entrenamiento, el modelo se evaluó utilizando el conjunto de prueba, el cual no fue empleado durante el entrenamiento ni la validación. El modelo obtuvo una accuracy del 100% (accuracy = 1,0), lo que indica que clasificó correctamente todas las imágenes del conjunto de prueba y demuestra una buema capacidad de generalización para las 20 especies de aves consideradas en el proyecto.
+Una vez finalizado el entrenamiento, el modelo se evaluó utilizando el conjunto de prueba, el cual no fue empleado durante el entrenamiento ni la validación. El modelo obtuvo una accuracy del 99% (accuracy = 0,99), lo que indica que clasificó correctamente todas las imágenes del conjunto de prueba y demuestra una buema capacidad de generalización para las 20 especies de aves consideradas en el proyecto.
 
 ### Control de overfitting (Regularización).  
 
 Con el fin de evaluar el posible overfitting del modelo, se realizó un segundo entrenamiento incorporando la regularización L2 de weight decay en el optimizador SGD. Este entrenamiento se llevó a cabo utilizando la misma arquitectura, los mismos hiperparámetros y el mismo número de épocas que el modelo base, de manera que la única diferencia entre ambos correspondiera a la incorporación de la regularización. Posteriormente, se compararon las curvas de pérdida y las métricas obtenidas para analizar el efecto de esta técnica sobre la capacidad de generalización del modelo.
 
 
-## **CORREGIR**
+![metricareg](imagenes_informe/metricascompa.png)
 
+Las lineas de pérdidas de entrenamiento y validación con regularización y sin regularización se superponen casi de manera identica. Esto nos indica que la penalización de los pesos no está haciendo una alteración en la forma que el modelo aprende.
+
+En ambos presenta ausencia de Overfitting, ambas curvas descienden de forma constante y se estabilizan, indicando que el modelo generaliza bien por sí solo.
+
+Ambos modelos alcanzan una precisión de validación muy alta (Alrededor del 98% - 99%).
 
 
 
@@ -208,7 +213,7 @@ En cambio, la sexta imagen corresponde a un Bald Eagle, una especie que no forma
 
 ![bald](imagenes_informe/6.jpg)
 
-Debido a ello, el modelo no pudo clasificarla correctamente y asignó una probabilidad de 49,96% a la especie más similar (ALPINE CHOUGH) dentro de las clases conocidas. Este comportamiento es esperable, ya que el modelo siempre debe elegir una de las especies con las que fue entrenado y no dispone de una categoría para indicar que la imagen pertenece a una especie desconocida.
+Debido a ello, el modelo no pudo clasificarla correctamente y asignó una probabilidad de 35,85% a la especie más similar (ALPINE CHOUGH) dentro de las clases conocidas. Este comportamiento es esperable, ya que el modelo siempre debe elegir una de las especies con las que fue entrenado y no dispone de una categoría para indicar que la imagen pertenece a una especie desconocida.
 
 Para analizar este resultado, se comparó la imagen del águila calva con una imagen representativa de la especie predicha por el modelo, la cual corresponde a *ALPHINE CHOUGH*. 
 
@@ -222,15 +227,16 @@ El reporte de clasificación presenta para cada una de las 20 especies, tres mé
 
 ![metricas](imagenes_informe/metricas.png)
 
-Los resultados obtenidos muestran un desempeño perfecto del modelo, alcanzando valores de 1.000 en precision, recall y f1-score para las 20 clases, además de un accuracy global del 100%. Este resultado es llamativo, ya que en problemas reales de clasificación de imágenes es poco frecuente que un modelo logre clasificar correctamente todos los ejemplos sin cometer ningún error. Por esta razón, un resultado de este tipo debe analizarse pensando en overfitting o sea que el modelo haya aprendido patrones demasiado específicos de las imágenes de entrenamiento en lugar de generalizar correctamente a las aves.
+Los resultados obtenidos muestran un desempeño prácticamente perfecto del modelo, alcanzando valores de 1.000 en precision, recall y f1-score para 18 clases, además de un accuracy global del 99%. Este resultado es llamativo, ya que en problemas reales de clasificación de imágenes es poco frecuente que un modelo logre clasificar en un porcentaje tan alto todos los ejemplos sin cometer ningún error. Por esta razón, un resultado de este tipo debe analizarse pensando en overfitting o sea que el modelo haya aprendido patrones demasiado específicos de las imágenes de entrenamiento en lugar de generalizar correctamente a las aves.
 
-Sin embargo, de acuerdo a la literatura en este caso existen varios factores que permiten explicar este comportamiento y sugieren que el resultado no necesariamente se debe a un problema de overfitting; primeramente el tamaño reducido del conjunto de test: Cada especie cuenta con solo 5 imágenes de evaluación (100 en total), por lo que obtener un 100% de accuracy es más probable que en un conjunto de datos más grande, donde podrían aparecer más errores. Además el modelo viene preentrenado; ResNet50 utiliza características aprendidas previamente a partir de millones de imágenes, lo que según Ultralytics. (s.f.). permite reconocer patrones visuales complejos y reduce el riesgo de que el modelo simplemente memorice las imágenes de entrenamiento. Por otro lado, hay diferencias claras entre especies ya que las clases presentan características visuales muy distintas, como colores, tamaños y formas, facilitando la separación entre categorías. Y finalmente es un dataset controlado: Las imágenes muestran principalmente un solo ejemplar con fondos poco complejos, lo que simplifica la clasificación en comparación con escenarios reales según Marcelino, P. (2018, 23 de octubre).
+Sin embargo, de acuerdo a la literatura en este caso existen varios factores que permiten explicar este comportamiento y sugieren que el resultado no necesariamente se debe a un problema de overfitting; primeramente el tamaño reducido del conjunto de test: Cada especie cuenta con solo 5 imágenes de evaluación (100 en total), por lo que obtener un 99% de accuracy es más probable que en un conjunto de datos más grande, donde podrían aparecer más errores. Además el modelo viene preentrenado; ResNet50 utiliza características aprendidas previamente a partir de millones de imágenes, lo que según Ultralytics. (s.f.). permite reconocer patrones visuales complejos y reduce el riesgo de que el modelo simplemente memorice las imágenes de entrenamiento. Por otro lado, hay diferencias claras entre especies ya que las clases presentan características visuales muy distintas, como colores, tamaños y formas, facilitando la separación entre categorías. Y finalmente es un dataset controlado: Las imágenes muestran principalmente un solo ejemplar con fondos poco complejos, lo que simplifica la clasificación en comparación con escenarios reales según Marcelino, P. (2018, 23 de octubre).
 
 ## Conclusiones
+Haber utilizado el transfer learning fue una buena decisión, el uso de la arquitectura preentrenada ResNet50, combinado con la congelación de las capas iniciales, demostró ser una estrategia altamente eficiente.
 
-## **EDITAR Y AGREGAR MÁS Y MEJORES**
+El 99% de accuracy indica un excelente desempeño dentro del conjunto de prueba utilizado, pero no garantiza un funcionamiento perfecto en cualquier situación. La prueba con un águila pelada, especie no incluida en el entrenamiento, mostró que el modelo tiene limitaciones al enfrentarse a nuevas categorías, confirmando que su buen rendimiento está limitado al dominio específico del dataset.
 
-El 100% de accuracy indica un excelente desempeño dentro del conjunto de prueba utilizado, pero no garantiza un funcionamiento perfecto en cualquier situación. La prueba con un águila pelada, especie no incluida en el entrenamiento, mostró que el modelo tiene limitaciones al enfrentarse a nuevas categorías, confirmando que su buen rendimiento está limitado al dominio específico del dataset.
+Contar con un porcentaje balanceado de datos del género ayudaría a que el modelo no presente sesgos al identificar si el ave es macho o hembra, ya que actualmente el 80% de las imágenes de entrenamiento corresponden a machos. De esta manera, el modelo no solo podría identificar la especie del ave, sino también predecir su sexo.
 
 ## Referencias
 
