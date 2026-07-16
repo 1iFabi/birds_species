@@ -31,8 +31,6 @@ El dataset contiene imágenes a color en formato jpg, organizadas en tres subcon
 
 Cada imagen del dataset contiene un solo ejemplar, el cual ocupa al menos el 50% de la imagen. Esto ayuda a que el modelo se enfoque en el ave y disminuye el ruido del fondo durante el entrenamiento.
 
-Además, el dataset incluye un archivo llamado *birds.csv*, que contiene las columnas *filepaths*, *labels*, *scientific label*, *data set* y *class_id*. Este archivo relaciona cada imagen con su especie, su nombre científico y el conjunto al que pertenece (train, validación o test).
-
 Como limitación, se indica que cerca del 80% de las imágenes corresponden a aves macho y solo el 20% a hembras. Debido a este desbalance, es posible que el modelo tenga un menor rendimiento al clasificar hembras, ya que los conjuntos de validación y prueba están formados principalmente por imágenes de machos. Además,se señala que todas las imágenes duplicadas detectadas fueron eliminadas para evitar que existieran imágenes repetidas entre los conjuntos de entrenamiento, validación y prueba, lo que ayuda a realizar una evaluación más confiable del modelo.
 
 
@@ -115,7 +113,7 @@ Una vez finalizado el entrenamiento, el modelo se evaluó utilizando el conjunto
 Con el fin de evaluar el posible overfitting del modelo, se realizó un segundo entrenamiento incorporando la regularización L2 de weight decay en el optimizador SGD. Este entrenamiento se llevó a cabo utilizando la misma arquitectura, los mismos hiperparámetros y el mismo número de épocas que el modelo base, de manera que la única diferencia entre ambos correspondiera a la incorporación de la regularización. Posteriormente, se compararon las curvas de pérdida y las métricas obtenidas para analizar el efecto de esta técnica sobre la capacidad de generalización del modelo.
 
 
-
+## **CORREGIR**
 
 
 
@@ -218,7 +216,21 @@ Para analizar este resultado, se comparó la imagen del águila calva con una im
 
 Ambas comparten características visuales, como una silueta oscura, el vuelo con las alas extendidas y una forma corporal similar, lo que probablemente influyó en la decisión del modelo. Este caso limita el modelo, no pudiendo identificar correctamente especies que no estuvieron presentes durante el entrenamiento.
 
-### Métricas
+### Métricas de desempeño
+
+El reporte de clasificación presenta para cada una de las 20 especies, tres métricas principales: *precision*, que indica de todas las predicciones realizadas por el modelo para una especie determinada cuántas fueron correctas; *recall*, que mide cuántas de las imágenes que realmente pertenecían a esa especie fueron identificadas correctamente; y *f1-score*, que corresponde a una combinación entre precision y recall. Además, se incluye el valor de *support*, que representa la cantidad de imágenes disponibles en el conjunto de prueba para cada especie.
+
+![metricas](imagenes_informe/metricas.png)
+
+Los resultados obtenidos muestran un desempeño perfecto del modelo, alcanzando valores de 1.000 en precision, recall y f1-score para las 20 clases, además de un accuracy global del 100%. Este resultado es llamativo, ya que en problemas reales de clasificación de imágenes es poco frecuente que un modelo logre clasificar correctamente todos los ejemplos sin cometer ningún error. Por esta razón, un resultado de este tipo debe analizarse pensando en overfitting o sea que el modelo haya aprendido patrones demasiado específicos de las imágenes de entrenamiento en lugar de generalizar correctamente a las aves.
+
+Sin embargo, de acuerdo a la literatura en este caso existen varios factores que permiten explicar este comportamiento y sugieren que el resultado no necesariamente se debe a un problema de overfitting; primeramente el tamaño reducido del conjunto de test: Cada especie cuenta con solo 5 imágenes de evaluación (100 en total), por lo que obtener un 100% de accuracy es más probable que en un conjunto de datos más grande, donde podrían aparecer más errores. Además el modelo viene preentrenado; ResNet50 utiliza características aprendidas previamente a partir de millones de imágenes, lo que según Ultralytics. (s.f.). permite reconocer patrones visuales complejos y reduce el riesgo de que el modelo simplemente memorice las imágenes de entrenamiento. Por otro lado, hay diferencias claras entre especies ya que las clases presentan características visuales muy distintas, como colores, tamaños y formas, facilitando la separación entre categorías. Y finalmente es un dataset controlado: Las imágenes muestran principalmente un solo ejemplar con fondos poco complejos, lo que simplifica la clasificación en comparación con escenarios reales según Marcelino, P. (2018, 23 de octubre).
+
+## Conclusiones
+
+## **EDITAR Y AGREGAR MÁS Y MEJORES**
+
+El 100% de accuracy indica un excelente desempeño dentro del conjunto de prueba utilizado, pero no garantiza un funcionamiento perfecto en cualquier situación. La prueba con un águila pelada, especie no incluida en el entrenamiento, mostró que el modelo tiene limitaciones al enfrentarse a nuevas categorías, confirmando que su buen rendimiento está limitado al dominio específico del dataset.
 
 ## Referencias
 
@@ -231,3 +243,12 @@ Ambas comparten características visuales, como una silueta oscura, el vuelo con
 * Innovatiana. (s. f.). ImageNet: El conjunto de datos que revolucionó la visión por computadora. Innovatiana. https://www.innovatiana.com/es/datasets/imagenet
 
 * Xu, W., Fu, Y.-L., y Zhu, D. (2023). ResNet and its application to medical image processing: Research progress and challenges. Computer Methods and Programs in Biomedicine, 240, 107660. https://doi.org/10.1016/j.cmpb.2023.107660 
+
+* GeeksforGeeks. (2025, 23 de julio). How does L1 and L2 regularization prevent overfitting? https://www.geeksforgeeks.org/machine-learning/how-does-l1-and-l2-regularization-prevent-overfitting/ 
+
+* Ultralytics. (s.f.). YOLOv5 transfer learning with frozen layers. https://docs.ultralytics.com/yolov5/tutorials/transfer-learning-with-frozen-layers#how-layer-freezing-works
+
+* Marcelino, P. (2018, 23 de octubre). Transfer learning from pre-trained models. Medium. https://medium.com/data-science/transfer-learning-from-pre-trained-models-f2393f124751 
+## Declaración de uso IA
+
+Se declara que para el proyecto se utilizaron herramientas de inteligencia artificial para bugs y errores en códigos, y revisión de redacción y gramática del informe, mas las ideas y análisis son propios de Fabián y Carla.
