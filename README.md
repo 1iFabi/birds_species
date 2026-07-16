@@ -52,9 +52,9 @@ Para clasificar las 20 especies de aves se utilizará la arquitectura ResNet50 m
 
 * **Pertinencia**: esta estrategia es indicada para resolver el problema de clasificar 20 especies de aves con un conjunto limitado de imágenes. Puesto que es más eficiente aprovechar la inteligencia visual que el modelo ya construyó previamente, en lugar de gastar tiempo buscando miles de fotos nuevas para entrenar una red neuronal completamente desde cero.
 
-## Implementación
+## Implementación y Resultados
 
-### EDA y feature engineering 
+### EDA 
 
 Primeramente, se definen las rutas de las carpetas principales del proyecto, identificando la ubicación de las imágenes para el entrenamiento, la validación y las pruebas finales del modelo. A continuación, el sistema obtiene la lista de las especies disponibles en la carpeta de entrenamiento para seleccionar las primeras diez incluyendo el nombre de cada ave como título. 
 
@@ -82,15 +82,142 @@ Posterior a eso, se usó la función *describe()* para revisar de forma rápida 
 
 Al revisar los resultados, se observa que todas las imágenes de la muestra miden exactamente 224 de ancho por 224 de alto, sin ninguna variación entre ellas hciendo que la desviación estándar sea 0. Esto significa que las imágenes ya vienen con un tamaño uniforme, por lo que no fue necesario aplicar un redimensionamiento adicional antes de usarlas en el entrenamiento. 
 
-Sin embargo, el análisis previo mostró que algunas especies de aves tienen bastantes más imágenes que otras. Esto es un problema, porque si el modelo ve muchas más fotos de una especie que de otra, puede terminar aprendiendo a acertar solo en las especies con más ejemplos, y fallar en las que tienen pocas. Para evitar eso, se calculó un peso distinto para cada especie: a las especies con pocas imágenes se les da un peso más alto, y a las que tienen muchas imágenes se les da un peso más bajo. De esta forma, cuando el modelo se equivoca en una especie con pocas fotos, ese error pesa más durante el entrenamiento, obligando al modelo a hacerlo mejor.
+Sin embargo, el análisis previo mostró que algunas especies de aves tienen bastantes más imágenes que otras. Esto es un problema, porque si el modelo ve muchas más fotos de una especie que de otra, puede terminar aprendiendo a acertar solo en las especies con más ejemplos, y fallar en las que tienen pocas. Para evitar eso, se calculó un peso distinto para cada especie: a las especies con pocas imágenes se les da un peso más alto, y a las que tienen muchas imágenes se les da un peso más bajo. De esta forma, cuando el modelo se equivoca en una especie con pocas fotos.
 
 ![nuevos pesos](imagenes_informe/sesgo.png)
 
+### Feature Engineering 
+
+Para el comienzo de la transformación de la data, se importó la arquitectura ResNet50 y se establece una secuencia de preprocesamiento; primero se cambia el tamaño de la imagen a 256 pixelesy luego se recorta para dejarla en 224x224 que es el tamaño que el modelo espera. Los datos se convierten en un tensor para que esté en el formato numérico correcto y se normalizan con la media y desviación estándar de ImageNet, asegurando que las imagenes lleguen al modelo en las mismas condiciones que este aprendió.
 
 ### Entrenamiento (Optimización). 
+
+En esta etapa se cargan automáticamente los conjuntos de entrenamiento, validación y prueba, identificando cada subcarpeta como una especie distinta de ave. Las imágenes se organizan en grupos de 32 y, en el conjunto de entrenamiento, se mezclan aleatoriamente para mejorar la capacidad de generalización del modelo.
+
+Posteriormente, se carga la red neuronal preentrenada ResNet50 y se adapta al problema de clasificación de las 20 especies de aves, reemplazando su última capa para ajustarla a las categorías del proyecto.Luego se congelan los pesos de las capas de ResNet50 para mantener el conocimiento aprendido durante su entrenamiento previo. Después, se reemplaza la última capa por una nueva con 20 salidas, una para cada especie de ave. Para el entrenamiento se utiliza la loss function CrossEntropyLoss, incorporando pesos para compensar el desbalance entre las clases.
+
+El entrenamiento se realiza durante 10 epochs. En cada una de ellas, el modelo procesa las imágenes del conjunto de entrenamiento, calcula el error, ajusta los pesos de la última capa y registra la pérdida obtenida. Posteriormente, se evalúa con el conjunto de validación, donde se calculan la pérdida y la precisión sin modificar los parámetros del modelo. 
+
+![epocas](imagenes_informe/epochs.png)
+
+La imagen muestra que tanto la loss function del entrenamiento *train_loss* como la función de pérdida de validación *val_loss* disminuyen de forma progresiva a medida que aumentan las épocas. En particular, la pérdida de entrenamiento baja desde 2,0164 hasta 0,2159, mientras que la pérdida de validación disminuye desde 0,8848 hasta 0,1009, lo que indica que el modelo aprende a realizar mejores predicciones con el paso del entrenamiento. En cambio, la precisión sobre el conjunto de validación *val_acc* se mantiene prácticamente constante durante todo el proceso. Después de iniciar con un 97%, alcanza un 100% en la tercera epoch y luego se estabiliza alrededor del 99% en las épocas restantes. Esto sugiere que el modelo logra una alta capacidad de clasificación desde las primeras épocas.
+
+El gráfico de abajo muestra la evolución de la función de pérdida durante el entrenamiento y la validación. 
+
+![curva](imagenes_informe/curva.png)
+
+Y se observa que la curva de validación se mantiene por debajo de la curva de entrenamiento durante todo el proceso, lo que sugiere que el modelo generaliza adecuadamente sobre datos no utilizados para el ajuste de los parámetros por tanto no hay overfitting.
+
+Una vez finalizado el entrenamiento, el modelo se evaluó utilizando el conjunto de prueba, el cual no fue empleado durante el entrenamiento ni la validación. El modelo obtuvo una accuracy del 100% (accuracy = 1,0), lo que indica que clasificó correctamente todas las imágenes del conjunto de prueba y demuestra una buema capacidad de generalización para las 20 especies de aves consideradas en el proyecto.
+
 ### Control de overfitting (Regularización).  
-### Testeo. 
-### Visualización de resultados. 
+
+Con el fin de evaluar el posible overfitting del modelo, se realizó un segundo entrenamiento incorporando la regularización L2 de weight decay en el optimizador SGD. Este entrenamiento se llevó a cabo utilizando la misma arquitectura, los mismos hiperparámetros y el mismo número de épocas que el modelo base, de manera que la única diferencia entre ambos correspondiera a la incorporación de la regularización. Posteriormente, se compararon las curvas de pérdida y las métricas obtenidas para analizar el efecto de esta técnica sobre la capacidad de generalización del modelo.
+
+
+
+
+
+
+
+### Testeo
+
+Dado que el modelo obtuvo una precisión muy alta sobre el conjunto de prueba, se realizó una evaluación adicional utilizando las imágenes de la carpeta *"images to predict"* incluida en el dataset, según se estudió en el código estas son seis. Esta carpeta contiene seis imágenes independientes que permiten comprobar el comportamiento del modelo sobre ejemplos individuales. Para ello, se cargaron las seis imágenes y se prepararon para ser ingresadas al modelo, con el objetivo de verificar si la especie predicha corresponde a la especie real. La imagende abajo muestra como ejemplo la segunda imagen de la carpeta, correspondiente a una grulla coronada.
+
+![grulla](imagenes_informe/avetest.png)
+
+Posteriormente, las seis imágenes fueron preparadas para su clasificación aplicando el mismo preprocesamiento utilizado durante el entrenamiento del modelo, incluyendo el cambio de tamaño, el recorte y la normalización. Finalmente, las imágenes quedaron listas para ser ingresadas al modelo y obtener la especie predicha para cada una.
+
+### Visualiazación de los resultados
+
+Las imágenes a predecir incluidas en el dataset pero no consideradas para train:
+
+<table>
+<tr>
+<td align="center">
+<img src="imagenes_informe/1.jpg" width="150"><br>
+<b>Imagen 1</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/2.jpg" width="150"><br>
+<b>Imagen 2</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/3.jpg" width="150"><br>
+<b>Imagen 3</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/4.jpg" width="150"><br>
+<b>Imagen 4</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/5.jpg" width="150"><br>
+<b>Imagen 5</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/6.jpg" width="150"><br>
+<b>Imagen 6</b>
+</td>
+</tr>
+</table>
+
+Las imágenes de abajo presenta las cinco especies con mayor probabilidad predichas por el modelo para cada una de las seis imágenes evaluadas. En las primeras cinco imágenes, el modelo identificó correctamente la especie African Crowned Crane con un 99%, asignándole probabilidades superiores al 91% y alcanzando valores cercanos al 99% en cuatro de los casos. Estos resultados muestran que el modelo es capaz de reconocer la especie con un alto nivel de confianza, incluso cuando existen diferencias en el ángulo, la postura o el encuadre de la fotografía.
+
+<table>
+<tr>
+<td align="center">
+<img src="imagenes_informe/1.png" width="2500"><br>
+<b>Imagen 1</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/2.png" width="2500"><br>
+<b>Imagen 2</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/3.png" width="2500"><br>
+<b>Imagen 3</b>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td align="center">
+<img src="imagenes_informe/4.png" width="2500"><br>
+<b>Imagen 4</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/5.png" width="2500"><br>
+<b>Imagen 5</b>
+</td>
+
+<td align="center">
+<img src="imagenes_informe/6.png" width="2500"><br>
+<b>Imagen 6</b>
+</td>
+</tr>
+</table>
+
+En cambio, la sexta imagen corresponde a un Bald Eagle, una especie que no forma parte de las 20 categorías utilizadas durante el entrenamiento. 
+
+![bald](imagenes_informe/6.jpg)
+
+Debido a ello, el modelo no pudo clasificarla correctamente y asignó una probabilidad de 49,96% a la especie más similar (ALPINE CHOUGH) dentro de las clases conocidas. Este comportamiento es esperable, ya que el modelo siempre debe elegir una de las especies con las que fue entrenado y no dispone de una categoría para indicar que la imagen pertenece a una especie desconocida.
+
+Para analizar este resultado, se comparó la imagen del águila calva con una imagen representativa de la especie predicha por el modelo, la cual corresponde a *ALPHINE CHOUGH*. 
+
+![bald](imagenes_informe/alphine.png)
+
+Ambas comparten características visuales, como una silueta oscura, el vuelo con las alas extendidas y una forma corporal similar, lo que probablemente influyó en la decisión del modelo. Este caso limita el modelo, no pudiendo identificar correctamente especies que no estuvieron presentes durante el entrenamiento.
+
 ### Métricas
 
 ## Referencias
